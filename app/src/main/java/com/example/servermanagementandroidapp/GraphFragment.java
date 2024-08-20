@@ -13,9 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
+import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -23,17 +23,14 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
-import java.util.Objects;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 
 public class GraphFragment extends Fragment {
@@ -55,9 +52,50 @@ public class GraphFragment extends Fragment {
         String timePeriod = bundle.getString("timePeriod");
 
 
+        url = "http://192.168.0.43:9000/getUtil?timePeriod=minute";
+        //url = "https://worldtimeapi.org/api/timezone/Europe/London";
+
+
+        String result;
+
+        HttpGetRequest getRequest = new HttpGetRequest();
+
+        try {
+            result = getRequest.execute(url).get();
+            if (result == null) {
+                result = "sdfhklsfdhklhsfold";
+            }
+            Log.d("lkjh", result);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*
+        //JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET)
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                //String dateTime = response.getString("dateTime");
+                //data.setText(dateTime);
+                Log.d("GraphFragement", "success");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("GraphFragement", "failure");
+            }
+        });
+
+        Volley.newRequestQueue(requireActivity().getApplicationContext()).add(request);
+
+
+/*
         OkHttpClient client = new OkHttpClient();
 
-        url = "http://worldtimeapi.org/api/timezone/Europe/London";
+        url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
 
 
 
