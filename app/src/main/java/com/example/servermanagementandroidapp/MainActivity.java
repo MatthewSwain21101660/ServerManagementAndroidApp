@@ -27,9 +27,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*
         if(savedInstanceState == null) {
             Bundle bundle = new Bundle();
-            bundle.putString("Time Period", "Minute");
+            bundle.putString("timePeriod", "minute");
 
             getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     .add(R.id.ramUtilisationGraph, GraphFragment.class, bundle)
                     .commit();
         }
+
+         */
 
         Spinner cpuTimePeriod = findViewById(R.id.cpuTimePeriod);
         Spinner ramTimePeriod = findViewById(R.id.ramTimePeriod);
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String timePeriod = timePeriods[position];
+        String timePeriod = timePeriods[position].toLowerCase();
 
         if (parent.getId() == R.id.cpuTimePeriod) {
             updateGraphFragment(R.id.cpuUtilisationGraph, timePeriod);
