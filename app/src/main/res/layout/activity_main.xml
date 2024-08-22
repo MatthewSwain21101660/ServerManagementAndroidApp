@@ -5,18 +5,25 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#505050"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/appTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="411dp"
+        android:layout_height="32dp"
+        android:background="#323232"
+        android:fontFamily="@font/gothic_a1"
         android:text="@string/server_management_android"
+        android:textAlignment="center"
+        android:textColor="#c8c8c8"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/cpuUtilisationTitle"
@@ -24,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="@string/cpu_utilisation"
+        android:textColor="#c8c8c8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ram_utilisation"
+        android:textColor="#c8c8c8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.041"
@@ -75,6 +84,7 @@
         android:layout_height="32dp"
         android:layout_marginEnd="20dp"
         android:textSize="14sp"
+        android:textColor="#c8c8c8"
         app:layout_constraintBottom_toTopOf="@+id/cpuUtilisationGraph"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -88,6 +98,7 @@
         android:layout_height="32dp"
         android:layout_marginEnd="20dp"
         android:textSize="14sp"
+        android:textColor="#c8c8c8"
         app:layout_constraintBottom_toTopOf="@+id/ramUtilisationGraph"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
