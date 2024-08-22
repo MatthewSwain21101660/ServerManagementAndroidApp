@@ -14,16 +14,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
@@ -51,108 +61,54 @@ public class GraphFragment extends Fragment {
         int containerID = bundle.getInt("containerID");
         String timePeriod = bundle.getString("timePeriod");
 
-
-        url = "http://192.168.0.43:9000/getUtil?timePeriod=minute";
-        //url = "https://worldtimeapi.org/api/timezone/Europe/London";
+        data = requireView().findViewById(R.id.test);
 
 
-        String result;
+        url = "http://10.0.2.2:9000/getUtil?timePeriod=" + timePeriod;
 
-        HttpGetRequest getRequest = new HttpGetRequest();
-
-        try {
-            result = getRequest.execute(url).get();
-            if (result == null) {
-                result = "sdfhklsfdhklhsfold";
-            }
-            Log.d("lkjh", result);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        /*
-        //JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET)
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
-                //String dateTime = response.getString("dateTime");
-                //data.setText(dateTime);
-                Log.d("GraphFragement", "success");
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("GraphFragement", "failure");
-            }
-        });
+            public void onResponse(JSONArray response) {
+                Log.d("GraphFragment", String.valueOf(response));
+                Log.d("GraphFragment", "success");
 
-        Volley.newRequestQueue(requireActivity().getApplicationContext()).add(request);
+                String responseDateTime = "";
 
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject reading = response.getJSONObject(i);
+                        responseDateTime = responseDateTime + " " + reading.getString("dateTime");
 
-/*
-        OkHttpClient client = new OkHttpClient();
-
-        url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
-
-
-
-            Request getRequest = new Request.Builder()
-                    .url(url)
-                    .build();
-
-            client.newCall(getRequest).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    //Toast.makeText(getContext(), "Could not connect", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "failure");
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String responseData = response.body().string();
-                        Log.d(TAG, "success");
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            });
 
-        /*
-        url = "https://worldtimeapi.org/api/timezone/Europe/London" + timePeriod;
-        //Toast.makeText(getContext(), url, Toast.LENGTH_SHORT).show();
-        data = getView().findViewById(R.id.test);
+                data.setText(responseDateTime);
+                Log.d("GraphFragment", responseDateTime);
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,  new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                String dateTime = null;
-                try {
-                    dateTime = response.getString("dateTime");
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-                Toast.makeText(getContext(), "Successful connection", Toast.LENGTH_SHORT).show();
-                data.setText(dateTime);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getContext(), "Could not connect", Toast.LENGTH_SHORT).show();
-                data.setText("Could not connect");
+                Log.d("Error.Response", error.toString());
+                if( error instanceof NetworkError) {
+                    Log.d("GraphFragement", "NetworkError");
+                } else if( error instanceof ServerError) {
+                    Log.d("GraphFragement", "ServerError");
+                } else if( error instanceof AuthFailureError) {
+                    Log.d("GraphFragement", "AuthFailureError");
+                } else if( error instanceof ParseError) {
+                    Log.d("GraphFragement", "ParseError");
+                } else if( error instanceof NoConnectionError) {
+                    Log.d("GraphFragement", "NoConnectionError");
+                } else if( error instanceof TimeoutError) {
+                    Log.d("GraphFragement", "TimeoutError");
+                }
+
+
             }
         });
         Volley.newRequestQueue(requireActivity().getApplicationContext()).add(request);
-
-        //GraphFragment.getInstance
-/*
-        if (containerID == R.id.cpuUtilisationGraph) {
-            Toast.makeText(getContext(), "cpu" + timePeriod, Toast.LENGTH_SHORT).show();
-        } else if (containerID == R.id.ramUtilisationGraph) {
-            Toast.makeText(getContext(), "ram" + timePeriod, Toast.LENGTH_SHORT).show();
-        }
-
- */
     }
 }

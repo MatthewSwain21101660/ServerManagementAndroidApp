@@ -8,6 +8,8 @@
 
 
     <application
+        android:usesCleartextTraffic="true"
+
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -33,3 +35,5 @@
     </application>
 
 </manifest>
+
+<!-- android:networkSecurityConfig="@xml/network_security_config" -->
