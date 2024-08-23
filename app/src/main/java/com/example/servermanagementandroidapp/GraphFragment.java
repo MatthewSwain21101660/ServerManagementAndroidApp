@@ -27,12 +27,20 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.google.type.DateTime;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +53,7 @@ import okhttp3.OkHttpClient;
 
 public class GraphFragment extends Fragment {
 
-    TextView data;
+    LineChart lineChart;
     String url;
 
     public GraphFragment() {
@@ -61,7 +69,8 @@ public class GraphFragment extends Fragment {
         int containerID = bundle.getInt("containerID");
         String timePeriod = bundle.getString("timePeriod");
 
-        data = requireView().findViewById(R.id.test);
+        //data = requireView().findViewById(R.id.test);
+        lineChart = (LineChart) requireView().findViewById(R.id.lineChart);
 
 
         url = "http://10.0.2.2:9000/getUtil?timePeriod=" + timePeriod;
@@ -69,23 +78,62 @@ public class GraphFragment extends Fragment {
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                Log.d("GraphFragment", String.valueOf(response));
+                //Log.d("GraphFragment", String.valueOf(response));
                 Log.d("GraphFragment", "success");
 
-                String responseDateTime = "";
+
+                List<Entry> entry = new ArrayList<>();
 
                 for (int i = 0; i < response.length(); i++) {
                     try {
-                        JSONObject reading = response.getJSONObject(i);
-                        responseDateTime = responseDateTime + " " + reading.getString("dateTime");
+                        float reading = Float.parseFloat(response.getJSONObject(i).getString("cpu"));
+                        //DateTime dateTime = response.getJSONObject(i).getString("dateTime");
+                        entry.add(new Entry(i, reading));
+                        //Log.d("entry", entry.toString());
+                        //responseDateTime = responseDateTime + " " + reading.getString("dateTime");
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                 }
 
-                data.setText(responseDateTime);
-                Log.d("GraphFragment", responseDateTime);
+                LineDataSet dataSet = new LineDataSet(entry, "Reading");
+
+                LineData lineData = new LineData(dataSet);
+
+                lineChart.setData(lineData);
+
+/*
+                ArrayList<String> xAxis = new ArrayList<String>();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                //String responseDateTime = "";
+
+                ArrayList<Entry> yAxis = new ArrayList<>();
+
+
+
+
+                //data.setText(responseDateTime);
+                //Log.d("GraphFragment", responseDateTime);
+                Log.d("GraphFragment", String.valueOf(yAxis));
+
+ */
 
             }
         }, new Response.ErrorListener() {
