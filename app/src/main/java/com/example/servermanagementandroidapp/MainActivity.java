@@ -27,19 +27,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*
-        if(savedInstanceState == null) {
-            Bundle bundle = new Bundle();
-            bundle.putString("timePeriod", "minute");
-
-            getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .add(R.id.cpuUtilisationGraph, GraphFragment.class, bundle)
-                    .add(R.id.ramUtilisationGraph, GraphFragment.class, bundle)
-                    .commit();
-        }
-
-         */
 
         Spinner cpuTimePeriod = findViewById(R.id.cpuTimePeriod);
         Spinner ramTimePeriod = findViewById(R.id.ramTimePeriod);
