@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         cpuTimePeriod.setAdapter(ad);
         ramTimePeriod.setAdapter(ad);
+
+        //int
+        //cpuTimePeriod.setSelection
     }
 
     @Override
