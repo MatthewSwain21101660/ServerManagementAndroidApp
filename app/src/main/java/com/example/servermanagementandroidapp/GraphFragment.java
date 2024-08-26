@@ -29,7 +29,6 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +49,9 @@ public class GraphFragment extends Fragment {
     String url;
     Timer timer;
     TimerTask timerTask;
+    XAxis xAxis;
+    YAxis yAxis;
+    SimpleDateFormat dtf;
 
     public GraphFragment() {
         super(R.layout.fragment_graph);
@@ -71,12 +73,15 @@ public class GraphFragment extends Fragment {
 
         url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
 
-        //drawGraph(containerID, timePeriod);
         lineChart = (LineChart) view.findViewById(R.id.lineChart);
 
-//lineChart.moveViewTo();
+        dtf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+        xAxis = lineChart.getXAxis();
+        yAxis = lineChart.getAxisLeft();
 
         startTimerTask(containerID, timePeriod);
+
     }
 
 
@@ -94,13 +99,12 @@ public class GraphFragment extends Fragment {
 
         timer = new Timer();
 
-        drawGraph(containerID, timePeriod);
-
+        drawGraph(timePeriod);
 
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                drawGraph(containerID, timePeriod);
+                queryAPI(containerID);
             }
         };
 
@@ -116,39 +120,32 @@ public class GraphFragment extends Fragment {
     }
 
 
+    private void drawGraph(String timePeriod) {
+        lineChart.getAxisRight().setDrawLabels(false);
+        lineChart.getLegend().setEnabled(false);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.getXAxis().setDrawGridLines(false);
+        lineChart.getAxisRight().setDrawGridLines(false);
 
-    private void drawGraph(int[] containerID, String timePeriod) {
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setGranularity(1f);
+        xAxis.setValueFormatter(new CustomXAxisValueFormatter(timePeriod));
+        Log.d("drawGraph", "drawGraph");
+
+        yAxis.setTextColor(Color.WHITE);
+        yAxis.setAxisMinimum(0f);
+    }
+
+
+    private void queryAPI(int[] containerID) {
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+
                 lineChart.invalidate();
                 lineChart.refreshDrawableState();
 
-                SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-
-                long now;
-                try {
-                    now = Objects.requireNonNull(dtf.parse(response.getJSONObject(0).getString("dateTime"))).getTime();
-                } catch (JSONException | ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                List<Entry> entry = new ArrayList<>();
-
-                lineChart.getAxisRight().setDrawLabels(false);
-                lineChart.getLegend().setEnabled(false);
-                lineChart.getDescription().setEnabled(false);
-                lineChart.getXAxis().setDrawGridLines(false);
-                lineChart.getAxisRight().setDrawGridLines(false);
-
-
-                XAxis xAxis = lineChart.getXAxis();
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                xAxis.setTextColor(Color.WHITE);
-
-                YAxis yAxis = lineChart.getAxisLeft();
-                yAxis.setTextColor(Color.WHITE);
-                yAxis.setAxisMinimum(0f);
 
 
                 if (Arrays.equals(containerID, new int[]{R.id.cpuUtilisationGraph})) {
@@ -162,6 +159,18 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
+                long now;
+                try {
+                    now = Objects.requireNonNull(dtf.parse(response.getJSONObject(0).getString("dateTime"))).getTime();
+                } catch (JSONException | ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+
+
+
+                List<Entry> entry = new ArrayList<>();
 
                 for (int i = 0; i < response.length(); i++) {
                     try {
@@ -203,7 +212,6 @@ public class GraphFragment extends Fragment {
                 dataSet.setDrawCircles(false);
                 dataSet.setDrawHighlightIndicators(false);
                 dataSet.setDrawValues(false);
-
 
                 LineData lineData = new LineData(dataSet);
 
