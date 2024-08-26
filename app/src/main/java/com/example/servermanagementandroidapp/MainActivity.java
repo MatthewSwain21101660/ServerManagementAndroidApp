@@ -1,19 +1,11 @@
 package com.example.servermanagementandroidapp;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.FragmentManager;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
@@ -41,8 +33,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         cpuTimePeriod.setAdapter(ad);
         ramTimePeriod.setAdapter(ad);
 
-        //int
-        //cpuTimePeriod.setSelection
+        if (savedInstanceState == null) {
+
+        }
     }
 
     @Override

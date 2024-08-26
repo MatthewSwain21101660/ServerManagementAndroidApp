@@ -7,7 +7,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -27,6 +29,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,9 +48,16 @@ public class GraphFragment extends Fragment {
 
     LineChart lineChart;
     String url;
+    Timer timer;
+    TimerTask timerTask;
 
     public GraphFragment() {
         super(R.layout.fragment_graph);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_graph, container, false);
     }
 
     @Override
@@ -59,27 +69,61 @@ public class GraphFragment extends Fragment {
         final int[] containerID = {bundle.getInt("containerID")};
         String timePeriod = bundle.getString("timePeriod");
 
-        //drawGraph(containerID, timePeriod);
+        url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
 
-        new Timer().schedule(new TimerTask() {
+        //drawGraph(containerID, timePeriod);
+        lineChart = (LineChart) view.findViewById(R.id.lineChart);
+
+//lineChart.moveViewTo();
+
+        startTimerTask(containerID, timePeriod);
+    }
+
+
+    private void startTimerTask(int[] containerID, String timePeriod) {
+        int repeatPeriod = 0;
+        if (Objects.equals(timePeriod, "minute")) {
+            repeatPeriod = 1000;
+        } else if (Objects.equals(timePeriod, "hour")) {
+            repeatPeriod = 60000;
+        } else if (Objects.equals(timePeriod, "day") || Objects.equals(timePeriod, "week")) {
+            repeatPeriod = 3600000;
+        } else if (Objects.equals(timePeriod, "month")) {
+            repeatPeriod = 86400000;
+        }
+
+        timer = new Timer();
+
+        drawGraph(containerID, timePeriod);
+
+
+        timerTask = new TimerTask() {
             @Override
             public void run() {
                 drawGraph(containerID, timePeriod);
             }
-        }, 0, 1000);
+        };
+
+        timer.schedule(timerTask, 0, repeatPeriod);
     }
 
-    private void drawGraph(@NonNull int[] containerID, @NonNull String timePeriod) {
-        lineChart = (LineChart) requireView().findViewById(R.id.lineChart);
+    private void stopTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
+    }
 
-        lineChart.invalidate();
-        lineChart.clear();
 
-        url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
 
+    private void drawGraph(int[] containerID, String timePeriod) {
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+                lineChart.invalidate();
+                lineChart.refreshDrawableState();
+
                 SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
                 long now;
@@ -97,6 +141,7 @@ public class GraphFragment extends Fragment {
                 lineChart.getXAxis().setDrawGridLines(false);
                 lineChart.getAxisRight().setDrawGridLines(false);
 
+
                 XAxis xAxis = lineChart.getXAxis();
                 xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                 xAxis.setTextColor(Color.WHITE);
@@ -104,7 +149,6 @@ public class GraphFragment extends Fragment {
                 YAxis yAxis = lineChart.getAxisLeft();
                 yAxis.setTextColor(Color.WHITE);
                 yAxis.setAxisMinimum(0f);
-                //yAxis.setAxisLineColor(Color.parseColor("#6b6c6c"));
 
 
                 if (Arrays.equals(containerID, new int[]{R.id.cpuUtilisationGraph})) {
@@ -130,7 +174,6 @@ public class GraphFragment extends Fragment {
                         }
 
 
-
                         String dateTime = response.getJSONObject(i).getString("dateTime");
                         try {
                             date = dtf.parse(dateTime);
@@ -145,7 +188,6 @@ public class GraphFragment extends Fragment {
 
                         assert date != null;
                         float finalValue = date.getTime() - now;
-
 
 
                         entry.add(new Entry(finalValue, reading));
@@ -171,48 +213,31 @@ public class GraphFragment extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                if( error instanceof NetworkError) {
+                if (error instanceof NetworkError) {
                     Log.d("GraphFragement", "NetworkError");
-                } else if( error instanceof ServerError) {
+                } else if (error instanceof ServerError) {
                     Log.d("GraphFragement", "ServerError");
-                } else if( error instanceof AuthFailureError) {
+                } else if (error instanceof AuthFailureError) {
                     Log.d("GraphFragement", "AuthFailureError");
-                } else if( error instanceof ParseError) {
+                } else if (error instanceof ParseError) {
                     Log.d("GraphFragement", "ParseError");
-                } else if( error instanceof NoConnectionError) {
+                } else if (error instanceof NoConnectionError) {
                     Log.d("GraphFragement", "NoConnectionError");
-                } else if( error instanceof TimeoutError) {
+                } else if (error instanceof TimeoutError) {
                     Log.d("GraphFragement", "TimeoutError");
                 }
 
 
             }
         });
+
         Volley.newRequestQueue(requireActivity().getApplicationContext()).add(request.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)));
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopTimer();
+    }
 }
-
-
-                /*
-
-                Date minDateTime;
-                try {
-                    minDateTime = dtf.parse(response.getJSONObject(0).getString("dateTime"));
-                } catch (JSONException | ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                Date maxDateTime;
-                try {
-                    maxDateTime = dtf.parse(response.getJSONObject(response.length() - 1).getString("dateTime"));
-                } catch (ParseException | JSONException e) {
-                    throw new RuntimeException(e);
-                }
-
-                assert minDateTime != null;
-                assert maxDateTime != null;
-                //xAxis.setAxisMinimum(minDateTime.getTime() - now);
-                //xAxis.setAxisMaximum(maxDateTime.getTime() - now);
-
-                 */
 
