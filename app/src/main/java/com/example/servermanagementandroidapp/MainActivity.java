@@ -121,13 +121,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(DialogInterface dialog, int which) {
                 ipAddress = input.getText().toString();
                 if (!ipAddress.isEmpty()) {
-                    //If the something has been entered into the input, it will be saved into shared preferences and the app will continue to be initialised.
-                    //There are currently no checks involved to see whether it is in the correct form, however it can be edited with the change ip button if the input is incorrect
-                    //There is currently no input sanitising, posing potential security risks however it is unclear how much of a risk this would be as the API will not respond to anything beyond the predefined URIs
-                    SharedPreferences.Editor editor = getSharedPreferences(sharePrefName, Context.MODE_PRIVATE).edit();
-                    editor.putString(sharePrefIP, ipAddress);
-                    editor.apply();
-                    initializeGraphs();
+                    String ipPattern = "^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$";
+                    //Checks to make sure the entered string is in the form of X.X.X.X. This makes sure the user enters a valid string and protects against any sort of injection attacks
+                    if (ipAddress.matches(ipPattern)) {
+                        //If the something has been entered into the input, it will be saved into shared preferences and the app will continue to be initialised.
+                        SharedPreferences.Editor editor = getSharedPreferences(sharePrefName, Context.MODE_PRIVATE).edit();
+                        editor.putString(sharePrefIP, ipAddress);
+                        editor.apply();
+                        initializeGraphs();
+                    } else {
+                        //If the entered string is not in the form of X.X.X.X, asks the user to enter a validate ip v4 address and calls the method again
+                        Toast.makeText(MainActivity.this, "Please enter an IP address in the form of X.X.X.X", Toast.LENGTH_SHORT).show();
+                        inputIPAddress();
+                    }
                 } else {
                     //If the user does not enter anything, a toast will appear asking them to enter an ip and the method it called again
                     Toast.makeText(MainActivity.this, "Please enter an IP address", Toast.LENGTH_SHORT).show();
