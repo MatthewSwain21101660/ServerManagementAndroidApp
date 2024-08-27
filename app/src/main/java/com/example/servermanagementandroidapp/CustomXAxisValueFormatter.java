@@ -13,6 +13,7 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
 
     @Override
     public String getFormattedValue(float value) {
+        //Calls the appropriate method depending on what the time period is
         if ("minute".equals(timePeriod)) {
             return getMinuteLabel(value);
         } else if ("hour".equals(timePeriod)) {
@@ -28,13 +29,14 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
         return super.getFormattedValue(value);
     }
 
+    //The following all sets appropriate labels for the time periods
+
     private String getMinuteLabel(float value) {
         if (value == 0) {
             return "1 minute";
         } else if (value == 30000.0) {
             return "30 seconds";
         }
-        // Return empty string or any other default label for values not explicitly handled
         return "";
     }
 
@@ -44,7 +46,6 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
         } else if (value == 2000000.0) {
             return "30 minutes";
         }
-        // Return empty string or any other default label for values not explicitly handled
         return "";
     }
 
@@ -55,7 +56,6 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
         } else if (value == 4.0E7) {
             return "12 hours";
         }
-        // Return empty string or any other default label for values not explicitly handled
         return "";
     }
     private String getWeekLabel(float value) {
@@ -65,7 +65,6 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
         } else if (value == 3.0E8) {
             return "4 days";
         }
-        // Return empty string or any other default label for values not explicitly handled
         return "";
     }
     private String getMonthLabel(float value) {
@@ -75,7 +74,6 @@ public class CustomXAxisValueFormatter extends ValueFormatter {
         } else if (value == 9.0E8) {
             return "15 days";
         }
-        // Return empty string or any other default label for values not explicitly handled
         return "";
     }
 }

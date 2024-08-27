@@ -23,10 +23,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private final String[] timePeriods = { "Minute", "Hour", "Day", "Week", "Month"};
 
     private String ipAddress;
-    private String sharePrefName = "AppPrefs";
-    private String sharePrefIP = "IPAddress";
-
-    private Button IPButton;
+    private final String sharePrefName = "AppPrefs";
+    private final String sharePrefIP = "IPAddress";
 
 
     public MainActivity() {
@@ -37,9 +35,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //When the app is first launched, check if there are any shared preferences containing a previously entered IP address. This way the user can enter a custom IP address but does not have to do so every time they launch the app
         SharedPreferences preferences = getSharedPreferences(sharePrefName, Context.MODE_PRIVATE);
         ipAddress = preferences.getString(sharePrefIP, null);
 
+        //If there is no stored IP address, launches the method to get an IP, otherwise continues to setup the app as normal
         if (ipAddress == null) {
             inputIPAddress();
         } else {
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void initializeGraphs() {
+        //The following code initialises the spinners so that the selectable options are from the previously defined timePeriods array. When an option is selected, the onItemSelectedListener is called and thus the graph is drawn
         Spinner cpuTimePeriod = findViewById(R.id.cpuTimePeriod);
         Spinner ramTimePeriod = findViewById(R.id.ramTimePeriod);
 
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         cpuTimePeriod.setAdapter(ad);
         ramTimePeriod.setAdapter(ad);
 
-        IPButton = findViewById(R.id.changeIPBuuton);
+        //OnClickListener that launches the set IP address method when the user clicks the change IP button
+        Button IPButton = findViewById(R.id.changeIPBuuton);
         IPButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,8 +74,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        //Sets the time period variable to the one the user has selected and converts it to lower case for compatibility with the API
         String timePeriod = timePeriods[position].toLowerCase();
 
+        //Calls the update graph fragment with the appropriate ID
         if (parent.getId() == R.id.cpuTimePeriod) {
             updateGraphFragment(R.id.cpuUtilisationGraph, timePeriod);
         } else if (parent.getId() == R.id.ramTimePeriod) {
@@ -84,53 +88,57 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        //If nothing is selected, nothing happens
     }
 
     private void updateGraphFragment(int containerID, String timePeriod) {
+        //Create a bundle with the required variables
         Bundle bundle = new Bundle();
         bundle.putInt("containerID", containerID);
         bundle.putString("timePeriod", timePeriod);
         bundle.putString("ipAddress", ipAddress);
 
+        //Calls the fragment with the bundle
         getSupportFragmentManager().beginTransaction()
                 .setReorderingAllowed(true)
                 .replace(containerID, GraphFragment.class, bundle)
                 .commit();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outstate) {
-        outstate.putString("ipAddress", "192.168.0.43");
-        super.onSaveInstanceState(outstate);
-    }
 
     private void inputIPAddress() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Please enter the IP address of the server");
+        //Creates an alert builder that contains the required components
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle("Please enter the IP address of the server");
 
+        //Creates an input for the user to enter the ip address
         EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        builder.setView(input);
+        alertBuilder.setView(input);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+        alertBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ipAddress = input.getText().toString();
                 if (!ipAddress.isEmpty()) {
+                    //If the something has been entered into the input, it will be saved into shared preferences and the app will continue to be initialised.
+                    //There are currently no checks involved to see whether it is in the correct form, however it can be edited with the change ip button if the input is incorrect
+                    //There is currently no input sanitising, posing potential security risks however it is unclear how much of a risk this would be as the API will not respond to anything beyond the predefined URIs
                     SharedPreferences.Editor editor = getSharedPreferences(sharePrefName, Context.MODE_PRIVATE).edit();
                     editor.putString(sharePrefIP, ipAddress);
                     editor.apply();
                     initializeGraphs();
                 } else {
+                    //If the user does not enter anything, a toast will appear asking them to enter an ip and the method it called again
                     Toast.makeText(MainActivity.this, "Please enter an IP address", Toast.LENGTH_SHORT).show();
                     inputIPAddress();
                 }
             }
         });
 
-        builder.setCancelable(false);
-        builder.show();
+        //Calls the alert that has just been built
+        alertBuilder.setCancelable(false);
+        alertBuilder.show();
     }
 
 }
