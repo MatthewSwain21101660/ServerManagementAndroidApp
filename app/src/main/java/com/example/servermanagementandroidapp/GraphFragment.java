@@ -70,8 +70,9 @@ public class GraphFragment extends Fragment {
         assert bundle != null;
         final int[] containerID = {bundle.getInt("containerID")};
         String timePeriod = bundle.getString("timePeriod");
+        String ipAddress = bundle.getString("ipAddress");
 
-        url = "http://192.168.0.43:9000/getUtil?timePeriod=" + timePeriod;
+        url = "http://" + ipAddress + ":9000/getUtil?timePeriod=" + timePeriod;
 
         lineChart = (LineChart) view.findViewById(R.id.lineChart);
 
@@ -104,7 +105,7 @@ public class GraphFragment extends Fragment {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                queryAPI(containerID);
+                updateGraph(containerID);
             }
         };
 
@@ -138,7 +139,7 @@ public class GraphFragment extends Fragment {
     }
 
 
-    private void queryAPI(int[] containerID) {
+    private void updateGraph(int[] containerID) {
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
