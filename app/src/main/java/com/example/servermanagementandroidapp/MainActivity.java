@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private String ipAddress;
     private String sharePrefName = "AppPrefs";
     private String sharePrefIP = "IPAddress";
+
+    private Button IPButton;
 
 
     public MainActivity() {
@@ -57,6 +60,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         cpuTimePeriod.setAdapter(ad);
         ramTimePeriod.setAdapter(ad);
+
+        IPButton = findViewById(R.id.changeIPBuuton);
+        IPButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inputIPAddress();
+            }
+        });
     }
 
     @Override
@@ -121,4 +132,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         builder.setCancelable(false);
         builder.show();
     }
+
 }
